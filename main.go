@@ -26,7 +26,7 @@ func main() {
 	s := gocron.NewScheduler(time.UTC)
 
 	_, err := s.Every(1).Minutes().Do(func() {
-		fmt.Println("loop started")
+		// fmt.Println("loop started")
 		loopFunction()
 	})
 	if err != nil {
@@ -61,13 +61,12 @@ func loopFunction() {
 	mapSholat := make(map[string]DataSholat)
 
 	for _, data := range dataJadwal {
-		fmt.Println(data)
 		mapSholat[data.Tanggal] = data
 	}
 
 	timeNow := time.Now()
 	dateString := timeNow.Format("2006-01-02")
-	fmt.Println(dateString)
+
 	if data, ok := mapSholat[dateString]; ok {
 		// loop data inside of the struct
 		mapDataSholat := toMap(data)
@@ -78,7 +77,8 @@ func loopFunction() {
 			oneMinute, _ := time.ParseDuration("1m")
 
 			// checking if the diff time is around 10 minutes
-			if diff >= oneMinute*9 && diff <= oneMinute*10 && diff > 0 {
+			if diff >= oneMinute*9 && diff < oneMinute*10 && diff > 0 {
+				fmt.Println("going to notify slack, ", diff, " - ", key, " - ", dataSholat.Format("15:04"))
 				err = callSlack(key, dataSholat.Format("15:04"))
 				if err != nil {
 					fmt.Println("ERROR CALL SLACK", err)
