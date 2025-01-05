@@ -32,5 +32,8 @@ COPY --from=builder /app/jadwal_sholat .
 # Copy the JSON file
 COPY jadwal_sholat.json .
 
+# Copy the url text
+COPY url.text .
+
 # Set the command to run the application
 CMD ["./jadwal_sholat"]
