@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -137,7 +138,14 @@ func callSlack(sholat, waktu string) error {
 		return err
 	}
 
-	client := &http.Client{}
+	// skip check and verify the link, because that's trusted one
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(dataByte))
 	if err != nil {
