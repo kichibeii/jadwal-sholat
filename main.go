@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -44,7 +45,6 @@ func main() {
 }
 
 func loopFunction() {
-
 	jsonFile, err := os.Open("jadwal_sholat.json")
 	if err != nil {
 		panic(err)
@@ -122,7 +122,10 @@ type DataCallSlack struct {
 }
 
 func callSlack(sholat, waktu string) error {
-	url := ""
+	url, err := readURLFromFile()
+	if err != nil {
+		panic(err)
+	}
 
 	dataCallSlack := DataCallSlack{
 		Name: sholat,
@@ -151,4 +154,25 @@ func callSlack(sholat, waktu string) error {
 	}
 
 	return nil
+}
+
+func readURLFromFile() (string, error) {
+	file, err := os.Open("url.text")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Read the first line from the file
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() {
+		return scanner.Text(), nil
+	}
+
+	// Check for errors during scanning
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+
+	return "", fmt.Errorf("file is empty")
 }
