@@ -64,7 +64,12 @@ func loopFunction() {
 		mapSholat[data.Tanggal] = data
 	}
 
-	timeNow := time.Now()
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		panic(err)
+	}
+
+	timeNow := time.Now().In(loc)
 	dateString := timeNow.Format("2006-01-02")
 
 	if data, ok := mapSholat[dateString]; ok {
