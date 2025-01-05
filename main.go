@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
+	"go.uber.org/zap"
 )
 
 type DataSholat struct {
@@ -22,11 +23,15 @@ type DataSholat struct {
 	Isya    string `json:"isya"`
 }
 
+var logger *zap.Logger
+
 func main() {
+	logger, _ = zap.NewProduction()
+	defer logger.Sync()
+
 	s := gocron.NewScheduler(time.UTC)
 
 	_, err := s.Every(1).Minutes().Do(func() {
-		// fmt.Println("loop started")
 		loopFunction()
 	})
 	if err != nil {
@@ -71,6 +76,7 @@ func loopFunction() {
 
 	timeNow := time.Now().In(loc)
 	dateString := timeNow.Format("2006-01-02")
+	logger.Info("Loop Started", zap.String("date", dateString))
 
 	if data, ok := mapSholat[dateString]; ok {
 		// loop data inside of the struct
@@ -83,7 +89,7 @@ func loopFunction() {
 
 			// checking if the diff time is around 10 minutes
 			if diff >= oneMinute*9 && diff < oneMinute*10 && diff > 0 {
-				fmt.Println("going to notify slack, ", diff, " - ", key, " - ", dataSholat.Format("15:04"))
+				logger.Info("Calling Slack", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
 				err = callSlack(key, dataSholat.Format("15:04"))
 				if err != nil {
 					fmt.Println("ERROR CALL SLACK", err)
