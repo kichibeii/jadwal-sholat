@@ -90,11 +90,20 @@ func loopFunction() {
 
 			// checking if the diff time is around 10 minutes
 			if diff >= oneMinute*9 && diff < oneMinute*10 && diff > 0 {
-				logger.Info("Calling Slack", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
-				err = callSlack(key, dataSholat.Format("15:04"))
+				logger.Info("Calling Slack Prayer Time - 10 Minute", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
+				err = callSlack(key, dataSholat.Format("15:04"), 1)
 				if err != nil {
-					fmt.Println("ERROR CALL SLACK", err)
+					logger.Error("[Error Call Slack]", zap.Error(err))
 				}
+			}
+
+			if diff <= oneMinute && diff > 0 {
+				logger.Info("Calling Slack Prayer Time", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
+
+				// err = callSlack(key, dataSholat.Format("15:04"), 2)
+				// if err != nil {
+				// 	logger.Error("[Error Call Slack]", zap.Error(err))
+				// }
 			}
 		}
 	}
@@ -122,8 +131,8 @@ type DataCallSlack struct {
 	Time string `json:"time"`
 }
 
-func callSlack(sholat, waktu string) error {
-	url, err := readURLFromFile()
+func callSlack(sholat, waktu string, reminderType int) error {
+	url, err := readURLFromFile(reminderType)
 	if err != nil {
 		panic(err)
 	}
@@ -164,8 +173,9 @@ func callSlack(sholat, waktu string) error {
 	return nil
 }
 
-func readURLFromFile() (string, error) {
-	file, err := os.Open("url.text")
+func readURLFromFile(reminderType int) (string, error) {
+	fileName := fmt.Sprintf("url%d.text", reminderType)
+	file, err := os.Open(fileName)
 	if err != nil {
 		return "", err
 	}
