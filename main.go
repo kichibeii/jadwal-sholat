@@ -97,7 +97,7 @@ func loopFunction() {
 				}
 			}
 
-			if diff <= oneMinute && diff > 0 {
+			if diff < oneMinute && diff > 0 {
 				logger.Info("Calling Slack Prayer Time", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
 
 				err = callSlack(key, dataSholat.Format("15:04"), 2)
