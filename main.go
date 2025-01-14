@@ -100,13 +100,22 @@ func loopFunction() {
 			if diff < oneMinute && diff > 0 {
 				logger.Info("Calling Slack Prayer Time", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
 
-				err = callSlack(key, dataSholat.Format("15:04"), 2)
+				chooseDocument := checkConditional(key, timeNow)
+				err = callSlack(key, dataSholat.Format("15:04"), chooseDocument)
 				if err != nil {
 					logger.Error("[Error Call Slack]", zap.Error(err))
 				}
 			}
 		}
 	}
+}
+
+func checkConditional(key string, dateNow time.Time) int {
+	if key == "Shubuh" || key == "Isya" || dateNow.Weekday() < time.Saturday {
+		return 3
+	}
+
+	return 2
 }
 
 func toMap(data DataSholat) map[string]time.Time {
