@@ -35,6 +35,7 @@ COPY jadwal_sholat.json .
 # Copy the url text
 COPY url1.text .
 COPY url2.text .
+COPY url3.text .
 
 # Set the command to run the application
 CMD ["./jadwal_sholat"]
