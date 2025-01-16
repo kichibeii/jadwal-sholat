@@ -77,19 +77,19 @@ func loopFunction() {
 
 	timeNow := time.Now().In(loc)
 	dateString := timeNow.Format("2006-01-02")
-	logger.Info("Loop Started", zap.String("date", dateString))
-
 	if data, ok := mapSholat[dateString]; ok {
 		// loop data inside of the struct
 		mapDataSholat := toMap(data)
 		timeHour := timeNow.Format("15:04")
 		hourNow, _ := time.Parse("15:04", timeHour)
+		logger.Info("Checking", zap.String("date", fmt.Sprintf("%02d:%02d:%02d", timeNow.Hour(), timeNow.Minute(), timeNow.Second())))
+
 		for key, dataSholat := range mapDataSholat {
 			diff := dataSholat.Sub(hourNow)
-			oneMinute, _ := time.ParseDuration("1m")
+			tenMinuteBefore := dataSholat.Add(-10 * time.Minute)
 
 			// checking if the diff time is around 10 minutes
-			if diff >= oneMinute*9 && diff < oneMinute*10 && diff > 0 {
+			if timeNow.Hour() == dataSholat.Hour() && timeNow.Minute() == tenMinuteBefore.Minute() {
 				logger.Info("Calling Slack Prayer Time - 10 Minute", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
 				err = callSlack(key, dataSholat.Format("15:04"), 1)
 				if err != nil {
@@ -97,7 +97,7 @@ func loopFunction() {
 				}
 			}
 
-			if diff < oneMinute && diff > 0 {
+			if timeNow.Hour() == dataSholat.Hour() && timeNow.Minute() == dataSholat.Minute() {
 				logger.Info("Calling Slack Prayer Time", zap.Duration("diff", diff), zap.String("Sholat", key), zap.String("waktu", dataSholat.Format("15:04")))
 
 				chooseDocument := checkConditional(key, timeNow)
