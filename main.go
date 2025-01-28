@@ -111,7 +111,7 @@ func loopFunction() {
 }
 
 func checkConditional(key string, dateNow time.Time) int {
-	if key == "Shubuh" || key == "Isya" || dateNow.Weekday() < time.Saturday {
+	if key == "Shubuh" || key == "Isya" || dateNow.Weekday() >= time.Saturday {
 		return 3
 	}
 
